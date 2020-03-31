@@ -1,0 +1,37 @@
+{
+  "name": "distanceproover",
+  "version": "0.0.1",
+  "description": "DIstance Proover",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iden3/distanceProover.git"
+  },
+  "keywords": [
+    "gps",
+    "zkSnarks",
+    "distance",
+    "proover",
+    "circom",
+    "example",
+    "tutorial"
+  ],
+  "author": "Jordi Baylina",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/iden3/distanceProover/issues"
+  },
+  "homepage": "https://github.com/iden3/distanceProover#readme",
+  "dependencies": {
+    "big-integer": "^1.6.48",
+    "circomlib": "^0.1.1",
+    "wasmsnark": "0.0.10"
+  },
+  "devDependencies": {
+    "circom": "^0.5.4",
+    "ffiasm": "0.0.2"
+  }
+}

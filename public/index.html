@@ -1,0 +1,164 @@
+<html>
+<header>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="bundle.js"></script>
+    <script>
+        function init() {
+
+            const now = new Date();
+            const now0 = new Date(new Date().toISOString().slice(0,10));
+            let now1 = new Date(now0);
+            now1.setDate(now0.getDate()+1);
+            // Sign Form
+            $("#identifier").val("1234");
+            $("#timestamp").val(now.toISOString().slice(0,19));
+            $("#lat").val(41.39);
+            $("#long").val(2.16);
+
+            // Proof Form
+            $("#refTimestampFromP").val(now0.toISOString().slice(0,19));
+            $("#refTimestampToP").val(now1.toISOString().slice(0,19));
+            $("#refLatP").val(41.39);
+            $("#refLongP").val(2.16);
+            $("#refDistanceP").val(10);
+
+            // Verifier Form
+            $("#identifierV").val("1234");
+            $("#refTimestampFromV").val(now0.toISOString().slice(0,19));
+            $("#refTimestampToV").val(now1.toISOString().slice(0,19));
+            $("#refLatV").val(41.39);
+            $("#refLongV").val(2.16);
+            $("#refDistanceV").val(10);
+        }
+
+        function packAndSign() {
+            const pack = {
+                identifier: parseInt($("#identifier").val()),
+                timestamp: Math.floor(new Date($("#timestamp").val()).getTime()/1000),
+                lat: parseFloat($("#lat").val()),
+                long: parseFloat($("#long").val())
+            }
+            // alert(JSON.stringify(pack, null, 1));
+            const signature = distanceProver.sign(
+                pack.identifier,
+                pack.timestamp,
+                pack.lat,
+                pack.long
+            );
+            $("#signedPackResult").text(signature);
+        }
+
+        function prove() {
+            const input = {
+                signedPosition: $("#signedPosition").val(),
+                refTimestampFrom: Math.floor(new Date($("#refTimestampFromP").val()).getTime()/1000),
+                refTimestampTo: Math.floor(new Date($("#refTimestampToP").val()).getTime()/1000),
+                refLat: parseFloat($("#refLatP").val()),
+                refLong: parseFloat($("#refLongP").val()),
+                refDistance: parseInt($("#refDistanceP").val())
+            };
+            // alert(JSON.stringify(input, null, 1));
+            $("#proofResult").text("");
+            distanceProver.prove(
+                input.signedPosition,
+                input.refTimestampFrom,
+                input.refTimestampTo,
+                input.refDistance,
+                input.refLat,
+                input.refLong
+            ).then( (proof) => {
+                $("#proofResult").text(JSON.stringify(proof));
+            });
+        }
+
+        function verify() {
+            const input = {
+                proof: JSON.parse($("#proof").val()),
+                identifier: parseInt($("#identifierV").val()),
+                refTimestampFrom: Math.floor(new Date($("#refTimestampFromV").val()).getTime()/1000),
+                refTimestampTo: Math.floor(new Date($("#refTimestampToV").val()).getTime()/1000),
+                refLat: parseFloat($("#refLatV").val()),
+                refLong: parseFloat($("#refLongV").val()),
+                refDistance: parseInt($("#refDistanceV").val()),
+            }
+            // alert(JSON.stringify(input, null, 1));
+            $("#verifyResult").text();
+            const res = distanceProver.verify(
+                input.proof,
+                input.identifier,
+                input.refTimestampFrom,
+                input.refTimestampTo,
+                input.refDistance,
+                input.refLat,
+                input.refLong
+            ).then((res) => {
+                $("#verifyResult").text(res ? "VALID" : "INVALID");
+            })
+        }
+
+    </script>
+
+</header>
+<body onLoad=init()>
+    <h2>Position Sign</h2>
+    <form>
+        <label for="identifier">Identifier</label>
+        <input type="text" id="identifier"/><br>
+        <label for="timestamp">Timestamp</label>
+        <input type="datetime-local" id="timestamp" step="1"/>GMT<br>
+        <label for="lat">Latitude</label>
+        <input type="text" id="lat"/><br>
+        <label for="long">Longitud</label>
+        <input type="text" id="long"/><br>
+        <button type="button" onClick = "packAndSign()">Pack and Signn</button><br>
+    </form>
+    <h3>Packed Signed Position</h3>
+    <code id="signedPackResult">
+    </code>
+ 
+    <h2>Distance Prover</h2>
+    <form>
+        <label for="signedPosition">Signed Position</label>
+        <input type="text" size=100 id="signedPosition"/><br>
+        <label for="refTimestampFromP">Timestamp</label>
+        <input type="datetime-local" id="refTimestampFromP" step="1"/>GMT<br>
+        <label for="refTimestampToP">Timestamp</label>
+        <input type="datetime-local" id="refTimestampToP" step="1"/>GMT<br>
+        <label for="refLatP">Latitude</label>
+        <input type="text" id="refLatP"/><br>
+        <label for="refLongP">Longitud</label>
+        <input type="text" id="refLongP"/><br>
+        <label for="refDistanceP">Max distance</label>
+        <input type="text" id="refDistanceP"/>Km<br>
+        <button type="button" onClick = "prove()">Proof</button><br>
+    </form>
+    <h3>Proof</h3>
+    <code id="proofResult">
+    </code>
+
+    <h2>Distance Verifier</h2>
+    <form>
+        <label for="proof">Proof</label>
+        <input type="text" size=100 rows=30 id="proof"/><br>
+        <label for="identifierV">Identifier</label>
+        <input type="text" id="identifierV"/><br>
+        <label for="refTimestampFromV">Timestamp</label>
+        <input type="datetime-local" id="refTimestampFromV" step="1"/>GMT<br>
+        <label for="refTimestampToV">Timestamp</label>
+        <input type="datetime-local" id="refTimestampToV" step="1"/>GMT<br>
+        <label for="reflatV">Latitude</label>
+        <input type="text" id="refLatV"/><br>
+        <label for="refLongV">Longitud</label>
+        <input type="text" id="refLongV"/><br>
+        <label for="refDistanceV">Max distance</label>
+        <input type="text" id="refDistanceV"/>Km<br>
+        <button type="button" onClick = "verify()">Verify</button><br>
+    </form>
+    <h3>Verification Result</h3>
+    <code id="verifyResult">
+    </code>
+
+
+</body>
+
+</html>
